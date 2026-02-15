@@ -8,6 +8,7 @@ class Play extends Phaser.Scene{
         this.load.path = "./assets/";
         this.load.image('groundPlatform', 'GroundPlatformDebug.png');
         this.load.image('platform', 'Platform.png');
+        this.load.image('portal', 'debugportal.png');
         this.load.spritesheet('gravityArrow', 'GravityArrow.png', {
             frameWidth: 48,
             frameHeight: 64,
@@ -26,10 +27,30 @@ class Play extends Phaser.Scene{
 
     create() {
 
-        this.add.sprite(width /2 - 50, height / 2, 'gravityArrow').setAngle(180);
-        this.add.sprite(width / 2 + 50, height / 2, 'directionArrow').setAngle(90);
+        this.gravityArrow = this.add.sprite(width /2 - 50, height / 2, 'gravityArrow').setAngle(180).setVisible(false);
+        this.directionArrow = this.add.sprite(width / 2 + 50, height / 2, 'directionArrow').setAngle(90).setVisible(false);
+        this.anims.create({
+            key: 'gravityArrowBlink',
+            frames: this.anims.generateFrameNumbers('gravityArrow', {start: 0, end: 1}),
+            frameRate: 6,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'directionArrowBlink',
+            frames: this.anims.generateFrameNumbers('directionArrow', {start: 0, end: 1}),
+            frameRate: 6,
+            repeat: -1
+        });
+        this.gravityArrow.play('gravityArrowBlink');
+        this.directionArrow.play('directionArrowBlink');
 
         this.ground = new Ground(this, 'groundPlatform', 200, height, width);
+
+        this.nextAngle = 0;
+        this.nextGravityKey = 'down';
+        this.nextFlip = false;
+        this.currentPortal = null;
 
         this.keys = this.input.keyboard.addKeys({
             W: Phaser.Input.Keyboard.KeyCodes.W,     // JUMP
@@ -77,14 +98,71 @@ class Play extends Phaser.Scene{
 
         this.physics.add.collider(this.player, this.platform)
 
+        this.startCycle();
+
     }
 
     update(time, delta) {
 
         const dt = delta / 1000;
+
         this.ground.update(dt);
+        this.playerFSM.step();
 
-            this.playerFSM.step();
+        if(this.currentPortal) {
+            this.currentPortal.update(dt);
+        }
 
+
+    }
+
+    pickNextPhase() {
+        const gravityKeys = Object.keys(cameraAngles);
+        const key = Phaser.Utils.Array.GetRandom(gravityKeys);
+
+        this.nextGravityKey = key;
+        this.nextAngle = cameraAngles[key];
+        this.nextFlip = Phaser.Math.Between(0, 1) === 1;
+    }
+
+    applyNextPhase() {
+        currentAngle = this.nextAngle;
+        flip = this.nextFlip;
+
+        this.cameras.main.setAngle(currentAngle);
+
+        if(flip) {
+            this.cameras.main.setZoom(-1, 1);
+        } else {
+            this.cameras.main.setZoom(1, 1);
+        }
+    }
+
+    updateArrows() {
+        this.gravityArrow.setAngle(this.nextAngle);
+        this.directionArrow.setFlipX(this.nextFlip);
+    }
+
+    startCycle() {
+        this.pickNextPhase();
+
+        this.time.delayedCall(2000, () => {
+            this.gravityArrow.setVisible(true);
+            this.directionArrow.setVisible(true);
+        });
+
+        this.time.delayedCall(4000, () => {
+            const spawnX = this.player.x + 500;
+            const spawnY = this.player.y;
+
+            this.currentPortal = new Portal(this, spawnX, spawnY, 'portal', this.player, 'entry', {
+                onEnter: () => {
+                    this.applyNextPhase();
+                },
+                onExitComplete: () => {
+                    this.startCycle();
+                }
+            });
+        });
     }
 }

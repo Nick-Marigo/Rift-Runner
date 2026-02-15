@@ -29,11 +29,11 @@ let game = new Phaser.Game(config)
 let cursors = null
 let { height, width } = game.config
 
+let currentAngle = 0;
 let cameraAngles = {
     down: 0,
     left: 90,
     up: 180,
     right: 270,
 };
-let currentAngle = 0;
 let flip = false;

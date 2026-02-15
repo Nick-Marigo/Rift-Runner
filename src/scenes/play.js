@@ -5,20 +5,31 @@ class Play extends Phaser.Scene{
 
     preload() {
 
-        this.load.image('platform', './assets/Platform.png');
-        this.load.image('gravityArrow', './assets/GravityArrow.png');
-        this.load.image('directionArrow', './assets/DirectionArrow.png');
+        this.load.path = "./assets/";
+        this.load.image('groundPlatform', 'GroundPlatformDebug.png');
+        this.load.image('platform', 'Platform.png');
+        this.load.spritesheet('gravityArrow', 'GravityArrow.png', {
+            frameWidth: 48,
+            frameHeight: 64,
+            startFrame: 0,
+            endFrame: 1
+        });
+        this.load.spritesheet('directionArrow', 'DirectionArrow.png', {
+            frameWidth: 48,
+            frameHeight: 64,
+            startFrame: 0,
+            endFrame: 1
+        });
         
 
     }
 
     create() {
 
-        this.platform = this.physics.add.sprite(width / 2, height, 'platform').setOrigin(0.5, 1);
-        this.platform.body.setAllowGravity(false);
-        this.platform.body.immovable = true;
-        this.add.image(width /2 - 50, height / 2, 'gravityArrow').setAngle(180);
-        this.add.image(width / 2 + 50, height / 2, 'directionArrow').setAngle(90);
+        this.add.sprite(width /2 - 50, height / 2, 'gravityArrow').setAngle(180);
+        this.add.sprite(width / 2 + 50, height / 2, 'directionArrow').setAngle(90);
+
+        this.ground = new Ground(this, 'groundPlatform', 200, height, width);
 
         this.keys = this.input.keyboard.addKeys({
             W: Phaser.Input.Keyboard.KeyCodes.W,     // JUMP
@@ -29,6 +40,8 @@ class Play extends Phaser.Scene{
 
         this.player = new Player(this, width / 2, 650, 'player', 0);
         this.player.setDisplaySize(48, 64);
+
+        this.physics.add.collider(this.player, this.ground.group);
 
         this.input.keyboard.on('keydown-G', () => {
             this.physics.world.drawDebug = this.physics.world.drawDebug ? false : true;
@@ -66,7 +79,10 @@ class Play extends Phaser.Scene{
 
     }
 
-    update() {
+    update(time, delta) {
+
+        const dt = delta / 1000;
+        this.ground.update(dt);
 
             this.playerFSM.step();
 

@@ -43,6 +43,8 @@ class Play extends Phaser.Scene{
         this.exitPortal = null;
         this.arrowTimer = null;
         this.portalTimer = null;
+        this.lastGravityKey = null;
+        this.lastFlip = null;
 
         this.keys = this.input.keyboard.addKeys({
             W: Phaser.Input.Keyboard.KeyCodes.W,     // JUMP
@@ -113,11 +115,20 @@ class Play extends Phaser.Scene{
 
     pickNextPhase() {
         const gravityKeys = Object.keys(cameraAngles);
-        const key = Phaser.Utils.Array.GetRandom(gravityKeys);
+
+        let key, flipChoice;
+
+        do {
+            key = Phaser.Utils.Array.GetRandom(gravityKeys);
+            flipChoice = Phaser.Math.Between(0, 1) === 1;
+        } while (key === this.lastGravityKey && flipChoice === this.lastFlip);
 
         this.nextGravityKey = key;
         this.nextAngle = cameraAngles[key];
         this.nextFlip = Phaser.Math.Between(0, 1) === 1;
+
+        this.lastGravityKey = key;
+        this.lastFlip = flipChoice;
     }
 
     applyNextPhase() {
@@ -196,6 +207,7 @@ class Play extends Phaser.Scene{
         this.arrowTimer = this.time.delayedCall(2000, () => {
             this.ui.events.emit('phaserWarning', {
                 gravityKey: this.nextGravityKey,
+                angle: this.nextAngle,
                 flip: this.nextFlip
             });
         });

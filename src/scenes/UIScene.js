@@ -42,7 +42,10 @@ class UIScene extends Phaser.Scene {
             const gravityArrowAngle = (cameraAngle + 180) % 360
             this.gravityArrow.setAngle(gravityArrowAngle);
 
-            this.directionArrow.setAngle(flip ? 270 : 90);
+            let forwardAngle = (90 + cameraAngle) % 360;
+            if (flip) forwardAngle = (forwardAngle + 180) % 360;
+
+            this.directionArrow.setAngle(forwardAngle);
     }
     
 }

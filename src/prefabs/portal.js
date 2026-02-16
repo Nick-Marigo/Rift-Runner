@@ -1,9 +1,8 @@
 class Portal extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, texture, player, type = 'entry', opts = {}) {
+    constructor(scene, x, y, texture, player = null, type = 'entry', opts = {}) {
         super(scene, x, y, texture)
         
         this.scene = scene;
-        this.player = player;
         this.type = type;
 
         this.onEnter = opts.onEnter ?? (() => {});
@@ -15,6 +14,8 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
         this.body.setAllowGravity(false);
         this.setImmovable(true);
 
+        this.overlapCollider = null;
+
         if(this.type === 'entry') {
             scene.physics.add.overlap(player, this, this.handleEnter, null, this);
         }
@@ -23,39 +24,56 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
     handleEnter() {
         if(this.type !== 'entry') return;
 
-        this.disableBody(true, true);
-        this.startTransition();
+        if(this.overlapCollider) {
+            this.scene.physics.world.removeCollider(this.overlapCollider);
+            this.overlapCollider = null;
+        }
+
+        this.body.enable = false;
+        this.setVisible(false);
+
+        this.onEnter();
+
+        this.scene.time.delayedCall(0, () => {
+            if (this.active) this.destroy();
+        });
     }
 
-    startTransition() {
+    /*startTransition() {
+
+        this.onEnter();
+
         this.player.body.setVelocity(0, 0);
         this.player.body.moves = false;
 
         this.scene.time.delayedCall(350, () => {
             this.spawnExit();
-        })
+        });
     }
 
     spawnExit() {
-        const exitX = this.player.x + 120;
-        const exitY = this.player.y - 40;
+        const cam = this.scene.cameras.main;
+        const exitX = cam.scrollX + (this.scene.scale.width * .25);
+        const exitY = this.player.y;
 
         const exitPortal = new Portal(this.scene, exitX, exitY, 'portal', this.player, 'exit');
 
         this.player.x = exitX;
         this.player.y = exitY;
-
         this.player.body.moves = true;
 
         this.scene.time.delayedCall(1500, ()=> {
             exitPortal.destroy();
-        })
-    }
+            this.onExitComplete();
+        });
+
+        this.destroy();
+    }*/
 
     update(dt) {
-        this.x -= 100 * dt;
+        this.x -= 200 * dt;
 
-        if(this.x + this.width < 0) {
+        if(this.x + this.width < -200) {
             this.destroy();
         }
     }

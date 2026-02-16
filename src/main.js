@@ -21,7 +21,7 @@ let config = {
             debug: true
         }
     },
-    scene: [ Play]
+    scene: [ Play, UIScene]
 }
 
 let game = new Phaser.Game(config)
@@ -31,9 +31,9 @@ let { height, width } = game.config
 
 let currentAngle = 0;
 let cameraAngles = {
-    down: 0,
-    left: 90,
-    up: 180,
-    right: 270,
+    up: 0,
+    right: 90,
+    down: 180,
+    left: 270
 };
 let flip = false;

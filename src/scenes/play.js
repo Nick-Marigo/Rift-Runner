@@ -27,30 +27,22 @@ class Play extends Phaser.Scene{
 
     create() {
 
-        this.gravityArrow = this.add.sprite(width /2 - 50, height / 2, 'gravityArrow').setAngle(180).setVisible(false);
-        this.directionArrow = this.add.sprite(width / 2 + 50, height / 2, 'directionArrow').setAngle(90).setVisible(false);
-        this.anims.create({
-            key: 'gravityArrowBlink',
-            frames: this.anims.generateFrameNumbers('gravityArrow', {start: 0, end: 1}),
-            frameRate: 6,
-            repeat: -1
-        });
+        this.worldLayer = this.add.layer();
 
-        this.anims.create({
-            key: 'directionArrowBlink',
-            frames: this.anims.generateFrameNumbers('directionArrow', {start: 0, end: 1}),
-            frameRate: 6,
-            repeat: -1
-        });
-        this.gravityArrow.play('gravityArrowBlink');
-        this.directionArrow.play('directionArrowBlink');
+        this.scene.launch('UIScene');
+        this.ui = this.scene.get('UIScene');
 
         this.ground = new Ground(this, 'groundPlatform', 200, height, width);
+        this.worldLayer.add(this.ground.group.getChildren());
 
         this.nextAngle = 0;
         this.nextGravityKey = 'down';
         this.nextFlip = false;
         this.currentPortal = null;
+        this.isTransitioning = false;
+        this.exitPortal = null;
+        this.arrowTimer = null;
+        this.portalTimer = null;
 
         this.keys = this.input.keyboard.addKeys({
             W: Phaser.Input.Keyboard.KeyCodes.W,     // JUMP
@@ -61,6 +53,7 @@ class Play extends Phaser.Scene{
 
         this.player = new Player(this, width / 2, 650, 'player', 0);
         this.player.setDisplaySize(48, 64);
+        this.worldLayer.add(this.player);
 
         this.physics.add.collider(this.player, this.ground.group);
 
@@ -96,8 +89,6 @@ class Play extends Phaser.Scene{
         console.log("Object spawned. Moving World Left.");
     }, this);
 
-        this.physics.add.collider(this.player, this.platform)
-
         this.startCycle();
 
     }
@@ -111,6 +102,10 @@ class Play extends Phaser.Scene{
 
         if(this.currentPortal) {
             this.currentPortal.update(dt);
+        }
+
+        if(this.exitPortal) {
+            this.exitPortal.update(dt);
         }
 
 
@@ -140,28 +135,78 @@ class Play extends Phaser.Scene{
 
     updateArrows() {
         this.gravityArrow.setAngle(this.nextAngle);
-        this.directionArrow.setFlipX(this.nextFlip);
+
+        this.directionArrow.setAngle(this.nextFlip ? 270 : 90);
+        this.directionArrow.setFlipX(false);
+    }
+
+    enterPortalTransition() {
+        if (this.isTransitioning) return;
+        this.isTransitioning = true;
+
+        this.ui.events.emit('hideWarning');
+
+        this.cameras.main.fadeOut(500);
+
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.applyNextPhase();
+
+            const safeX = this.cameras.main.scrollX + (this.scale.width * 0.25);
+
+            const safeY = this.player.y;
+
+            this.player.setPosition(safeX, safeY);
+            this.player.body.setVelocity(0, 0);
+
+            this.cameras.main.fadeIn(500);
+
+            this.spawnExitPortal(safeX, safeY);
+        })
+    }
+
+    spawnExitPortal(x, y) {
+        const exit = new Portal(this, x, y, 'portal', null, 'exit');
+        exit.setDepth(100);
+
+        exit.setScale(0);
+        this.tweens.add({
+            targets: exit,
+            scale: 1,
+            duration: 200
+        });
+
+        this.exitPortal = exit;
+
+        this.time.delayedCall(1500, () => {
+            if(exit && exit.active) exit.destroy();
+            this.exitPortal = null;
+
+            this.isTransitioning = false;
+            this.startCycle();
+        })
     }
 
     startCycle() {
+
+        if (this.arrowTimer) this.arrowTimer.remove(false);
+        if (this.portalTimer) this.portalTimer.remove(false);
+
         this.pickNextPhase();
 
-        this.time.delayedCall(2000, () => {
-            this.gravityArrow.setVisible(true);
-            this.directionArrow.setVisible(true);
+        this.arrowTimer = this.time.delayedCall(2000, () => {
+            this.ui.events.emit('phaserWarning', {
+                gravityKey: this.nextGravityKey,
+                flip: this.nextFlip
+            });
         });
 
-        this.time.delayedCall(4000, () => {
+        this.portalTimer = this.time.delayedCall(4000, () => {
             const spawnX = this.player.x + 500;
             const spawnY = this.player.y;
 
             this.currentPortal = new Portal(this, spawnX, spawnY, 'portal', this.player, 'entry', {
-                onEnter: () => {
-                    this.applyNextPhase();
-                },
-                onExitComplete: () => {
-                    this.startCycle();
-                }
+                //player: this.player,
+                onEnter: () => this.enterPortalTransition()
             });
         });
     }

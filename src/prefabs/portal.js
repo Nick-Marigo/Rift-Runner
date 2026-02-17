@@ -39,36 +39,6 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
         });
     }
 
-    /*startTransition() {
-
-        this.onEnter();
-
-        this.player.body.setVelocity(0, 0);
-        this.player.body.moves = false;
-
-        this.scene.time.delayedCall(350, () => {
-            this.spawnExit();
-        });
-    }
-
-    spawnExit() {
-        const cam = this.scene.cameras.main;
-        const exitX = cam.scrollX + (this.scene.scale.width * .25);
-        const exitY = this.player.y;
-
-        const exitPortal = new Portal(this.scene, exitX, exitY, 'portal', this.player, 'exit');
-
-        this.player.x = exitX;
-        this.player.y = exitY;
-        this.player.body.moves = true;
-
-        this.scene.time.delayedCall(1500, ()=> {
-            exitPortal.destroy();
-            this.onExitComplete();
-        });
-
-        this.destroy();
-    }*/
 
     update(dt) {
         this.x -= 200 * dt;

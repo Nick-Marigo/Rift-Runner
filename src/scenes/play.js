@@ -9,6 +9,11 @@ class Play extends Phaser.Scene{
         this.load.image('groundPlatform', 'GroundPlatformDebug.png');
         this.load.image('platform', 'Platform.png');
         this.load.image('portal', 'debugportal.png');
+        this.load.image('spikeOne', 'Spike.png');
+        this.load.image('spikeFour', 'SpikeFour.png');
+        this.load.image('spikeEight', 'SpikeEight.png');
+        this.load.image('platform', 'Platform.png');
+        this.load.image('platformLong', 'PlatformLong.png')
         this.load.spritesheet('gravityArrow', 'GravityArrow.png', {
             frameWidth: 48,
             frameHeight: 64,
@@ -64,7 +69,7 @@ class Play extends Phaser.Scene{
             this.physics.world.debugGraphic.clear();
         }, this);
 
-        this.input.keyboard.on('keydown-R', () => {
+        /*this.input.keyboard.on('keydown-R', () => {
             currentAngle += 90;
             this.cameras.main.setAngle(currentAngle);
         }, this);        
@@ -89,7 +94,14 @@ class Play extends Phaser.Scene{
         testObj.body.setVelocityX(-200); 
         
         console.log("Object spawned. Moving World Left.");
-    }, this);
+    }, this);*/
+
+        this.obstacles = new ObstacleManager(this, 800);
+        this.physics.add.collider(this.player, this.obstacles.platformGroup);
+
+        this.physics.add.overlap(this.player, this.obstacles.hazardGroup, () => {
+            console.log("Game Over");
+        });
 
         this.startCycle();
 
@@ -110,6 +122,7 @@ class Play extends Phaser.Scene{
             this.exitPortal.update(dt);
         }
 
+        this.obstacles.update(dt);
 
     }
 
@@ -204,7 +217,7 @@ class Play extends Phaser.Scene{
 
         this.pickNextPhase();
 
-        this.arrowTimer = this.time.delayedCall(2000, () => {
+        this.arrowTimer = this.time.delayedCall(8000, () => {
             this.ui.events.emit('phaserWarning', {
                 gravityKey: this.nextGravityKey,
                 angle: this.nextAngle,
@@ -212,7 +225,7 @@ class Play extends Phaser.Scene{
             });
         });
 
-        this.portalTimer = this.time.delayedCall(4000, () => {
+        this.portalTimer = this.time.delayedCall(10000, () => {
             const spawnX = this.player.x + 500;
             const spawnY = this.player.y;
 

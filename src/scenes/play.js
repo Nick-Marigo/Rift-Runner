@@ -162,15 +162,14 @@ class Play extends Phaser.Scene{
 
         this.distanceThisCycle += this.scrollSpeed * dt;
 
-        const portalTriggerDistance = (this.chunksPerCycle - 1) * this.CHUNK_WIDTH + this.PORTAL_OFFSET_IN_CHUNK;
+        //const portalTriggerDistance = (this.chunksPerCycle - 1) * this.CHUNK_WIDTH + this.PORTAL_OFFSET_IN_CHUNK;
 
-                if(Math.floor(this.distanceThisCycle) % 200 === 0) {
-            console.log("distance: ", this.distanceThisCycle, "trigger:", portalTriggerDistance);
-        }
 
         if(!this.isTransitioning && !this.currentPortal && !this.portalPlanned) {
-            if(this.distanceThisCycle >= portalTriggerDistance) {
-                this.spawnPortalAtOffscreenRight();
+            if(this.distanceThisCycle >= this.chunksPerCycle) {
+                if(this.obstacles.nextSpawnX < this.scale.width + 100) {
+                    this.spawnPortalAtOffscreenRight();
+                }
             }
         }
 
@@ -182,10 +181,11 @@ class Play extends Phaser.Scene{
 
         this.portalPlanned = true;
 
-        const info = this.obstacles.lastSpawnInfo;
+        /*const info = this.obstacles.lastSpawnInfo;
         if (!info) return;
 
-        const portalX = info.chunkEndX - this.CHUNK_WIDTH + this.PORTAL_OFFSET_IN_CHUNK;
+        const portalX = info.chunkEndX - this.CHUNK_WIDTH + this.PORTAL_OFFSET_IN_CHUNK;*/
+        const portalX = this.obstacles.nextSpawnX + 200;
         const portalY = 750;
 
             this.currentPortal = new Portal(this, portalX, portalY, 'portal', this.scrollSpeed, this.player, 'entry', { 

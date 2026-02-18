@@ -28,7 +28,6 @@ const CHUNKS = [
             {key: 'spikeEight', x: 256, yOffset: 0, type: 'hazard'},
             {key: 'platform', x: 320, yOffset: -140, type: 'platform'},
             {key: 'spikeFour', x: 512, yOffset: 0, type: 'hazard'},
-            {key: 'spikeOne', x: 620, yOffset: 0, type: 'hazard'},
             {key: 'spikeOne', x: 920, yOffset: 0, type: 'hazard'},
             {key: 'spikeOne', x: 1000, yOffset: 0, type: 'hazard'}
         ]
@@ -101,7 +100,7 @@ class ObstacleManager {
 
     update(dt, maxToSpawn = Infinity) {
 
-        //this.nextSpawnX -= this.scrollSpeed * dt;
+        this.nextSpawnX -= this.scrollSpeed * dt;
 
         const cam = this.scene.cameras.main;
         const camRight = cam.scrollX + this.scene.scale.width;

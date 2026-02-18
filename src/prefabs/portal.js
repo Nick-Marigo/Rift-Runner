@@ -40,8 +40,8 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
         });
     }
 
-    updateScrollSpeed(scrollSpeed) {
-        this.scrollSpeed = scrollSpeed;
+    setScrollSpeed(speed) {
+        this.scrollSpeed = speed;
     }
 
     update(dt) {

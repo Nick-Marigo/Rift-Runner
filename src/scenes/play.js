@@ -41,12 +41,17 @@ class Play extends Phaser.Scene{
         this.lastGravityKey = null;
         this.lastFlip = null;
 
-        this.scrollSpeed = 200;
+        this.scrollSpeed = 100;
         this.chunksPerCycle = this.getChunksPerCycle();
         this.chunksThisCycle = 0;
         this.portalPlanned = false;
         this.portalXPlanned = 0;
         this.portalYPlanned = 0;
+
+        this.CHUNK_WIDTH = 1250;
+        this.PORTAL_OFFSET_IN_CHUNK = 1000;
+        this.distanceThisCycle = 0;
+        this.warningFired = false;
 
         this.scene.launch('UIScene');
         this.ui = this.scene.get('UIScene');
@@ -119,10 +124,26 @@ class Play extends Phaser.Scene{
         this.handleChunkCycle(dt);
 
         if(this.currentPortal) {
+            this.currentPortal.setScrollSpeed(this.scrollSpeed);
             this.currentPortal.update(dt);
         }
 
+        if(this.currentPortal && !this.warningFired) {
+            const distanceToPlayer = this.currentPortal.x - this.player.x;
+
+            if(distanceToPlayer < 300) {
+                this.ui.events.emit('phaserWarning', {
+                gravityKey: this.nextGravityKey,
+                flip: this.nextFlip
+                });
+
+                this.warningFired= true;
+            }
+
+        }
+
         if(this.exitPortal) {
+            this.exitPortal.setScrollSpeed(this.scrollSpeed);
             this.exitPortal.update(dt);
         }
 
@@ -135,34 +156,41 @@ class Play extends Phaser.Scene{
         this.obstacles.scrollSpeed = this.scrollSpeed;
 
         const remaining = this.chunksPerCycle - this.chunksThisCycle;
-
         const spawnedNow = this.obstacles.update(dt, remaining);
 
         this.chunksThisCycle += spawnedNow;
 
-        if(!this.isTransitioning && !this.currentPortal && this.chunksThisCycle >= this.chunksPerCycle) {
-            this.spawnPortalAfterChunks();
+        this.distanceThisCycle += this.scrollSpeed * dt;
+
+        const portalTriggerDistance = (this.chunksPerCycle - 1) * this.CHUNK_WIDTH + this.PORTAL_OFFSET_IN_CHUNK;
+
+                if(Math.floor(this.distanceThisCycle) % 200 === 0) {
+            console.log("distance: ", this.distanceThisCycle, "trigger:", portalTriggerDistance);
+        }
+
+        if(!this.isTransitioning && !this.currentPortal && !this.portalPlanned) {
+            if(this.distanceThisCycle >= portalTriggerDistance) {
+                this.spawnPortalAtOffscreenRight();
+            }
         }
 
     }
 
-    spawnPortalAfterChunks() {
+    spawnPortalAtOffscreenRight() {
 
         this.obstacles.spawningEnabled = false;
 
-        this.ui.events.emit('phaserWarning', {
-            gravityKey: this.nextGravityKey,
-            flip: this.nextFlip
-        });
+        this.portalPlanned = true;
 
         const info = this.obstacles.lastSpawnInfo;
+        if (!info) return;
 
-        const portalX = info.chunkEndX + (info.gap * 0.5);
-        const portalY = this.player.y;
+        const portalX = info.chunkEndX - this.CHUNK_WIDTH + this.PORTAL_OFFSET_IN_CHUNK;
+        const portalY = 750;
 
-        this.currentPortal = new Portal(this, portalX, portalY, 'portal', this.scrollSpeed, this.player, 'entry', { 
-            onEnter: () => this.enterPortalTransition()
-        });
+            this.currentPortal = new Portal(this, portalX, portalY, 'portal', this.scrollSpeed, this.player, 'entry', { 
+                onEnter: () => this.enterPortalTransition()
+            });
 
     }
 
@@ -178,7 +206,8 @@ class Play extends Phaser.Scene{
 
         this.nextGravityKey = key;
         this.nextAngle = cameraAngles[key];
-        this.nextFlip = Phaser.Math.Between(0, 1) === 1;
+        this.nextFlip = flipChoice;
+        //this.nextFlip = Phaser.Math.Between(0, 1) === 1;
 
         this.lastGravityKey = key;
         this.lastFlip = flipChoice;
@@ -207,6 +236,12 @@ class Play extends Phaser.Scene{
     enterPortalTransition() {
         if (this.isTransitioning) return;
         this.isTransitioning = true;
+
+        this.portalPlanned = false;
+        this.currentPortal = null;
+
+        this.obstacles.platformGroup.clear(true, true);
+        this.obstacles.hazardGroup.clear(true, true);
 
         this.ui.events.emit('hideWarning');
 
@@ -241,30 +276,52 @@ class Play extends Phaser.Scene{
 
         this.exitPortal = exit;
 
-        this.time.delayedCall(1500, () => {
-            if(exit && exit.active) exit.destroy();
-            this.exitPortal = null;
+        const check = this.time.addEvent({
+            delay: 100,
+            loop: true,
+            callback: () => {
+                if(!this.exitPortal || !this.exitPortal.active) {
+                    check.remove(false);
 
-            this.isTransitioning = false;
+                    this.exitPortal = null;
+                    this.isTransitioning = false;
 
-            this.scrollSpeed += 25;
-            this.ground.scrollSpeed = this.scrollSpeed;
-            this.obstacles.scrollSpeed = this.scrollSpeed;
-            updateScrollSpeed(this.scrollSpeed);
-            this.startCycle();
-        })
+                    this.scrollSpeed += 25;
+                    this.ground.scrollSpeed = this.scrollSpeed;
+                    this.obstacles.scrollSpeed = this.scrollSpeed;
+
+                    this.startCycle();
+                }
+            }
+        });
+
     }
 
     startCycle() {
 
         this.currentPortal = null;
+        this.portalPlanned = false;
+
+        //this.cycleStartX = this.cameras.main.scrollX;
+
+        this.obstacles.platformGroup.clear(true, true);
+        this.obstacles.hazardGroup.clear(true, true);
 
         this.chunksPerCycle = this.getChunksPerCycle();
         this.chunksThisCycle = 0;
 
+        this.distanceThisCycle = 0;
+        this.warningFired = false;
+
         this.obstacles.spawningEnabled = true;
 
+        this.obstacles.nextSpawnX = this.scale.width + 200;
+        this.cycleStartX = this.obstacles.nextSpawnX;
+        this.distanceThisCycle = 0;
+
         this.pickNextPhase();
+
+        this.ui.events.emit('hideWarning');
 
     }
 

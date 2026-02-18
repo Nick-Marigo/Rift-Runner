@@ -1,28 +1,36 @@
 const CHUNKS = [
     {
         name: 'singleSpike',
-        width: 400,
+        width: 1250,
         items: [
-            {key: 'spikeOne', x: 320, yOffset: 0, type: 'hazard'}
+            {key: 'spikeOne', x: 320, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 620, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 920, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 1000, yOffset: 0, type: 'hazard'}
         ]
     },
     {
         name: 'platformHop',
-        width: 700,
+        width: 1250,
         items : [
             {key: 'platform', x: 320, yOffset: -140, type: 'platform'},
-            {key: 'spikeFour', x: 560, yOffset: 0, type: 'hazard'}
+            {key: 'spikeFour', x: 560, yOffset: 0, type: 'hazard'},
+            {key: 'spikeFour', x: 860, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 1000, yOffset: 0, type: 'hazard'}
         ]
     },
     {
         name: 'spikeFloor',
-        width: 640,
+        width: 1250,
         items: [
             {key: 'spikeEight', x: 0, yOffset: 0, type: 'hazard'},
             {key: 'platform', x: 64, yOffset: -140, type: 'platform'},
             {key: 'spikeEight', x: 256, yOffset: 0, type: 'hazard'},
             {key: 'platform', x: 320, yOffset: -140, type: 'platform'},
             {key: 'spikeFour', x: 512, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 620, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 920, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 1000, yOffset: 0, type: 'hazard'}
         ]
     }
 ];
@@ -93,7 +101,7 @@ class ObstacleManager {
 
     update(dt, maxToSpawn = Infinity) {
 
-        this.nextSpawnX -= this.scrollSpeed * dt;
+        //this.nextSpawnX -= this.scrollSpeed * dt;
 
         const cam = this.scene.cameras.main;
         const camRight = cam.scrollX + this.scene.scale.width;

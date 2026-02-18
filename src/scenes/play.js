@@ -85,7 +85,7 @@ class Play extends Phaser.Scene{
 
         this.startCycle();
 
-                /*this.input.keyboard.on('keydown-R', () => {
+             /*   this.input.keyboard.on('keydown-R', () => {
             currentAngle += 90;
             this.cameras.main.setAngle(currentAngle);
         }, this);        
@@ -94,7 +94,7 @@ class Play extends Phaser.Scene{
             if (this.cameras.main.zoomX === 1) {
                 this.cameras.main.setZoom(-1, 1);
             } else {
-                this.cameras.main.setZoom(1, 1);
+                this.cameras.main.setZoom(1, 1);r
             }
         }, this);
 

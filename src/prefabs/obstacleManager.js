@@ -117,14 +117,6 @@ class ObstacleManager {
            }
         }
 
-         /*while(this.nextSpawnX < camRight + this.spawnAhead) {
-            const chunk = this.pickChunkNoRepeat();
-            this.spawnChunk(chunk, this.nextSpawnX);
-
-            const gap = Phaser.Math.Between(120, 260);
-            this.nextSpawnX += chunk.width + gap;
-        }*/
-
         this.hazardGroup.children.iterate((obj) => {
             if (!obj) return;
             obj.x -= this.scrollSpeed * dt;

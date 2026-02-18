@@ -10,14 +10,14 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
         this.w = 48;
         this.h = 64;
-        //this.direction = direction;
         
         this.speedMultiplier = 1.0;
         this.scrollSpeed = scrollSpeed;
         this.playerMoveVelocity = 100;
 
         this.jumpSpeed = 450;
-        this.isSliding = false;
+        this.fallSpeed = 450;
+        //this.isSliding = false;
         
         scene.playerFSM = new StateMachine('run', {
             run: new RunState(),
@@ -41,10 +41,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     isGrounded() {
-        return this.body.blocked.down || this.body.touching.down || 
-               this.body.blocked.up || this.body.touching.up ||
-               this.body.blocked.left || this.body.touching.left ||
-               this.body.blocked.right || this.body.touching.right;
+        return this.body.blocked.down || this.body.touching.down;
     }
 }
 
@@ -67,6 +64,10 @@ class RunState extends State {
         if (S.isDown && player.isGrounded()) {
             this.stateMachine.transition('slide');
         }
+
+        if(!player.isGrounded()) {
+            this.stateMachine.transition('jump');
+        }
     }
 }
 
@@ -76,6 +77,10 @@ class JumpState extends State {
         const { S } = scene.keys;
 
         player.applyRunVelocity(scene);
+
+        if(S.isDown && player.body.velocity.y > -100) {
+            player.setVelocityY(player.fallSpeed);
+        }
 
         if(player.isGrounded()) {
             if (S.isDown) {
@@ -91,11 +96,8 @@ class SlideState extends State {
     enter(scene, player) {
         // Shrink the height by half
         player.body.setSize(player.width, player.height / 2);
+        player.body.setOffset(0, player.height / 2);
         
-        // Offset the hitbox so it stays on the floor
-        // This still depends on gravity direction!
-        //if (currentGravity === 'down') player.body.setOffset(0, player.height / 2);
-        //else if (currentGravity === 'up') player.body.setOffset(0, 0);
     }
 
     execute(scene, player) {
@@ -103,6 +105,7 @@ class SlideState extends State {
         player.applyRunVelocity(scene);
 
         if (!S.isDown) {
+            player.y -= player.height /2;
             this.stateMachine.transition(player.isGrounded() ? 'run' : 'jump');
         }
     }

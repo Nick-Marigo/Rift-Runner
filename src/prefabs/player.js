@@ -1,6 +1,6 @@
 class Player extends Phaser.Physics.Arcade.Sprite {
 
-    constructor(scene, x, y, texture, frame) {
+    constructor(scene, x, y, texture, frame, scrollSpeed) {
         super(scene, x, y, texture, frame);
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -13,8 +13,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         //this.direction = direction;
         
         this.speedMultiplier = 1.0;
-        this.scrollSpeed = 100;
-        this.playerMoveVelocity = 300;
+        this.scrollSpeed = scrollSpeed;
+        this.playerMoveVelocity = 100;
 
         this.jumpSpeed = 450;
         this.isSliding = false;
@@ -94,8 +94,8 @@ class SlideState extends State {
         
         // Offset the hitbox so it stays on the floor
         // This still depends on gravity direction!
-        if (currentGravity === 'down') player.body.setOffset(0, player.height / 2);
-        else if (currentGravity === 'up') player.body.setOffset(0, 0);
+        //if (currentGravity === 'down') player.body.setOffset(0, player.height / 2);
+        //else if (currentGravity === 'up') player.body.setOffset(0, 0);
     }
 
     execute(scene, player) {

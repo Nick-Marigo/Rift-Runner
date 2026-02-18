@@ -7,13 +7,12 @@ class Play extends Phaser.Scene{
 
         this.load.path = "./assets/";
         this.load.image('groundPlatform', 'GroundPlatformDebug.png');
-        this.load.image('platform', 'Platform.png');
         this.load.image('portal', 'debugportal.png');
-        this.load.image('spikeOne', 'Spike.png');
-        this.load.image('spikeFour', 'SpikeFour.png');
-        this.load.image('spikeEight', 'SpikeEight.png');
-        this.load.image('platform', 'Platform.png');
-        this.load.image('platformLong', 'PlatformLong.png')
+        this.load.image('spikeOne', '/obstacles/SpikeOne.png');
+        this.load.image('spikeFour', '/obstacles/SpikeFour.png');
+        this.load.image('spikeEight', '/obstacles/SpikeEight.png');
+        this.load.image('platform', '/obstacles/Platform.png');
+        this.load.image('platformLong', '/obstacles/PlatformLong.png')
         this.load.spritesheet('gravityArrow', 'GravityArrow.png', {
             frameWidth: 48,
             frameHeight: 64,
@@ -27,18 +26,9 @@ class Play extends Phaser.Scene{
             endFrame: 1
         });
         
-
     }
 
     create() {
-
-        this.worldLayer = this.add.layer();
-
-        this.scene.launch('UIScene');
-        this.ui = this.scene.get('UIScene');
-
-        this.ground = new Ground(this, 'groundPlatform', 200, height, width);
-        this.worldLayer.add(this.ground.group.getChildren());
 
         this.nextAngle = 0;
         this.nextGravityKey = 'down';
@@ -51,6 +41,18 @@ class Play extends Phaser.Scene{
         this.lastGravityKey = null;
         this.lastFlip = null;
 
+        this.scrollSpeed = 200;
+        this.chunksPerCycle = this.getChunksPerCycle();
+        this.chunksThisCycle = 0;
+        this.portalPlanned = false;
+        this.portalXPlanned = 0;
+        this.portalYPlanned = 0;
+
+        this.scene.launch('UIScene');
+        this.ui = this.scene.get('UIScene');
+
+        this.ground = new Ground(this, 'groundPlatform', this.scrollSpeed, height, width);
+
         this.keys = this.input.keyboard.addKeys({
             W: Phaser.Input.Keyboard.KeyCodes.W,     // JUMP
             S: Phaser.Input.Keyboard.KeyCodes.S,     // SLIDE
@@ -58,9 +60,8 @@ class Play extends Phaser.Scene{
             D: Phaser.Input.Keyboard.KeyCodes.D,     // RIGHT
         });
 
-        this.player = new Player(this, width / 2, 650, 'player', 0);
+        this.player = new Player(this, width / 2, 650, 'player', 0, this.scrollSpeed);
         this.player.setDisplaySize(48, 64);
-        this.worldLayer.add(this.player);
 
         this.physics.add.collider(this.player, this.ground.group);
 
@@ -69,7 +70,17 @@ class Play extends Phaser.Scene{
             this.physics.world.debugGraphic.clear();
         }, this);
 
-        /*this.input.keyboard.on('keydown-R', () => {
+
+        this.obstacles = new ObstacleManager(this, 800, this.scrollSpeed);
+        this.physics.add.collider(this.player, this.obstacles.platformGroup);
+
+        this.physics.add.overlap(this.player, this.obstacles.hazardGroup, () => {
+            console.log("Game Over");
+        });
+
+        this.startCycle();
+
+                /*this.input.keyboard.on('keydown-R', () => {
             currentAngle += 90;
             this.cameras.main.setAngle(currentAngle);
         }, this);        
@@ -96,15 +107,6 @@ class Play extends Phaser.Scene{
         console.log("Object spawned. Moving World Left.");
     }, this);*/
 
-        this.obstacles = new ObstacleManager(this, 800);
-        this.physics.add.collider(this.player, this.obstacles.platformGroup);
-
-        this.physics.add.overlap(this.player, this.obstacles.hazardGroup, () => {
-            console.log("Game Over");
-        });
-
-        this.startCycle();
-
     }
 
     update(time, delta) {
@@ -114,6 +116,8 @@ class Play extends Phaser.Scene{
         this.ground.update(dt);
         this.playerFSM.step();
 
+        this.handleChunkCycle(dt);
+
         if(this.currentPortal) {
             this.currentPortal.update(dt);
         }
@@ -122,7 +126,43 @@ class Play extends Phaser.Scene{
             this.exitPortal.update(dt);
         }
 
-        this.obstacles.update(dt);
+        //this.obstacles.update(dt);
+
+    }
+
+    handleChunkCycle(dt) {
+
+        this.obstacles.scrollSpeed = this.scrollSpeed;
+
+        const remaining = this.chunksPerCycle - this.chunksThisCycle;
+
+        const spawnedNow = this.obstacles.update(dt, remaining);
+
+        this.chunksThisCycle += spawnedNow;
+
+        if(!this.isTransitioning && !this.currentPortal && this.chunksThisCycle >= this.chunksPerCycle) {
+            this.spawnPortalAfterChunks();
+        }
+
+    }
+
+    spawnPortalAfterChunks() {
+
+        this.obstacles.spawningEnabled = false;
+
+        this.ui.events.emit('phaserWarning', {
+            gravityKey: this.nextGravityKey,
+            flip: this.nextFlip
+        });
+
+        const info = this.obstacles.lastSpawnInfo;
+
+        const portalX = info.chunkEndX + (info.gap * 0.5);
+        const portalY = this.player.y;
+
+        this.currentPortal = new Portal(this, portalX, portalY, 'portal', this.scrollSpeed, this.player, 'entry', { 
+            onEnter: () => this.enterPortalTransition()
+        });
 
     }
 
@@ -189,7 +229,7 @@ class Play extends Phaser.Scene{
     }
 
     spawnExitPortal(x, y) {
-        const exit = new Portal(this, x, y, 'portal', null, 'exit');
+        const exit = new Portal(this, x, y, 'portal', this.scrollSpeed, null, 'exit');
         exit.setDepth(100);
 
         exit.setScale(0);
@@ -206,11 +246,35 @@ class Play extends Phaser.Scene{
             this.exitPortal = null;
 
             this.isTransitioning = false;
+
+            this.scrollSpeed += 25;
+            this.ground.scrollSpeed = this.scrollSpeed;
+            this.obstacles.scrollSpeed = this.scrollSpeed;
+            updateScrollSpeed(this.scrollSpeed);
             this.startCycle();
         })
     }
 
     startCycle() {
+
+        this.currentPortal = null;
+
+        this.chunksPerCycle = this.getChunksPerCycle();
+        this.chunksThisCycle = 0;
+
+        this.obstacles.spawningEnabled = true;
+
+        this.pickNextPhase();
+
+    }
+
+    /*startCycle() {
+
+        this.chunksPerCycle = this.getChunksPerCycle();
+        this.chunksThisCycle = 0;
+        this.portalPlanned = false;
+        this.portalXPlanned = 0;
+        this.portalYPlanned = 0;
 
         if (this.arrowTimer) this.arrowTimer.remove(false);
         if (this.portalTimer) this.portalTimer.remove(false);
@@ -229,10 +293,14 @@ class Play extends Phaser.Scene{
             const spawnX = this.player.x + 500;
             const spawnY = this.player.y;
 
-            this.currentPortal = new Portal(this, spawnX, spawnY, 'portal', this.player, 'entry', {
+            this.currentPortal = new Portal(this, spawnX, spawnY, 'portal', this.scrollSpeed, this.player, 'entry', {
                 //player: this.player,
                 onEnter: () => this.enterPortalTransition()
             });
         });
+    }*/
+
+    getChunksPerCycle() {
+        return 1 + Math.floor((this.scrollSpeed - 100) / 50);
     }
 }

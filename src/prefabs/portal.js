@@ -1,9 +1,10 @@
 class Portal extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, texture, player = null, type = 'entry', opts = {}) {
+    constructor(scene, x, y, texture, scrollSpeed, player = null, type = 'entry', opts = {}) {
         super(scene, x, y, texture)
         
         this.scene = scene;
         this.type = type;
+        this.scrollSpeed = scrollSpeed;
 
         this.onEnter = opts.onEnter ?? (() => {});
         this.onExitComplete = opts.onExitComplete ?? (() => {});
@@ -17,7 +18,7 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
         this.overlapCollider = null;
 
         if(this.type === 'entry') {
-            scene.physics.add.overlap(player, this, this.handleEnter, null, this);
+            this.overlapCollider = scene.physics.add.overlap(player, this, this.handleEnter, null, this);
         }
     }
 
@@ -39,10 +40,14 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
         });
     }
 
+    updateScrollSpeed(scrollSpeed) {
+        this.scrollSpeed = scrollSpeed;
+    }
 
     update(dt) {
-        this.x -= 200 * dt;
+        this.x -= this.scrollSpeed * dt;
 
+        //const camLeft = this.scene.cameras.main.scrollX;
         if(this.x + this.width < -200) {
             this.destroy();
         }

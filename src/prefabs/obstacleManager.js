@@ -13,20 +13,32 @@ const CHUNKS = [
             {key: 'platform', x: 320, yOffset: -140, type: 'platform'},
             {key: 'spikeFour', x: 560, yOffset: 0, type: 'hazard'}
         ]
+    },
+    {
+        name: 'spikeFloor',
+        width: 640,
+        items: [
+            {key: 'spikeEight', x: 0, yOffset: 0, type: 'hazard'},
+            {key: 'platform', x: 64, yOffset: -140, type: 'platform'},
+            {key: 'spikeEight', x: 256, yOffset: 0, type: 'hazard'},
+            {key: 'platform', x: 320, yOffset: -140, type: 'platform'},
+            {key: 'spikeFour', x: 512, yOffset: 0, type: 'hazard'},
+        ]
     }
 ];
 
 class ObstacleManager {
-    constructor(scene, groundY) {
+    constructor(scene, groundY, scrollSpeed) {
         this.scene = scene;
         this.groundY = groundY;
-        this.scrollSpeed = 200;
+        this.scrollSpeed = scrollSpeed;
 
         this.platformGroup = scene.physics.add.staticGroup();
         this.hazardGroup = scene.physics.add.staticGroup();
 
         this.nextSpawnX = scene.scale.width + 200;
         this.lastChunk = null;
+        this.spawningEnabled = true;
 
         this.spawnAhead = 900;
 
@@ -34,6 +46,9 @@ class ObstacleManager {
     }
 
     pickChunkNoRepeat() {
+
+        if(CHUNKS.length === 1) return CHUNKS[0];
+
         let chunk;
         do{
             chunk = Phaser.Utils.Array.GetRandom(CHUNKS);
@@ -41,6 +56,21 @@ class ObstacleManager {
 
         this.lastChunk = chunk.name;
         return chunk;
+    }
+
+    spawnOneChunk() {
+        const chunk = this.pickChunkNoRepeat();
+        const startX = this.nextSpawnX;
+
+        this.spawnChunk(chunk, startX);
+
+        const gap = Phaser.Math.Between(150, 250);
+        const chunkEndX = startX + chunk.width;
+
+        this.nextSpawnX += chunk.width + gap;
+
+        this.lastSpawnInfo = { chunkEndX, gap};
+        return { chunk, startX, chunkEndX, gap};
     }
 
     spawnChunk(chunk, startX) {
@@ -51,31 +81,42 @@ class ObstacleManager {
 
             if (item.type === 'platform') {
                 const p = this.platformGroup.create(x, y, item.key);
-                p.setOrigin(0.5, 1);
+                p.setOrigin(0, 1);
                 p.refreshBody();
-                //p.body.immovable = true;
             } else if (item.type === 'hazard') {
                 const h = this.hazardGroup.create(x, y, item.key);
-                h.setOrigin(0.5, 1);
+                h.setOrigin(0, 1);
                 h.refreshBody();
             }
         }
     }
 
-    update(dt) {
+    update(dt, maxToSpawn = Infinity) {
 
         this.nextSpawnX -= this.scrollSpeed * dt;
 
         const cam = this.scene.cameras.main;
         const camRight = cam.scrollX + this.scene.scale.width;
 
-        while(this.nextSpawnX < camRight + this.spawnAhead) {
+        let spawned = 0;
+
+        if(this.spawningEnabled) {
+
+            while(spawned < maxToSpawn && this.nextSpawnX < camRight + this.spawnAhead) {
+
+                this.spawnOneChunk();
+                spawned++;
+
+           }
+        }
+
+         /*while(this.nextSpawnX < camRight + this.spawnAhead) {
             const chunk = this.pickChunkNoRepeat();
             this.spawnChunk(chunk, this.nextSpawnX);
 
             const gap = Phaser.Math.Between(120, 260);
             this.nextSpawnX += chunk.width + gap;
-        }
+        }*/
 
         this.hazardGroup.children.iterate((obj) => {
             if (!obj) return;
@@ -94,5 +135,8 @@ class ObstacleManager {
             const camLeft = this.scene.cameras.main.scrollX;
             if(obj.x + obj.width < camLeft - this.cleanupBuffer) obj.destroy();
         });
+
+        return spawned;
+
     }
 }

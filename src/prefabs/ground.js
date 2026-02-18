@@ -1,9 +1,9 @@
 class Ground {
-    constructor(scene, texture, speed, height, width) {
+    constructor(scene, texture, scrollSpeed, height, width) {
         this.scene = scene;
 
         this.texture = texture;
-        this.speed = speed;
+        this.scrollSpeed = scrollSpeed;
         this.height = height;
         this.width = width;
 
@@ -17,8 +17,8 @@ class Ground {
     }
 
     update(dt) {
-        this.ground1.x -= this.speed * dt;
-        this.ground2.x -= this.speed * dt;
+        this.ground1.x -= this.scrollSpeed * dt;
+        this.ground2.x -= this.scrollSpeed * dt;
 
         if(this.ground1.x + this.width < 0) {
             this.ground1.x = this.ground2.x + this.width;

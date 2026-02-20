@@ -2,6 +2,9 @@
 // Name: Nick Marigo
 // Date: 2/2/2026
 
+//Font: https://www.dafont.com/ethnocentric.font
+
+
 "use strict"
 
 let config = {

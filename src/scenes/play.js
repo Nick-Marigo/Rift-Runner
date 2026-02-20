@@ -7,7 +7,12 @@ class Play extends Phaser.Scene{
 
         this.load.path = "./assets/";
         this.load.image('groundPlatform', 'GroundPlatformDebug.png');
-        this.load.image('portal', 'debugportal.png');
+        this.load.spritesheet('portal', 'Portal.png', {
+            frameWidth: 48,
+            frameHeight: 128,
+            startFrame: 0,
+            endFrame: 3
+        });
         this.load.image('spikeOne', '/obstacles/SpikeOne.png');
         this.load.image('spikeFour', '/obstacles/SpikeFour.png');
         this.load.image('spikeEight', '/obstacles/SpikeEight.png');
@@ -36,6 +41,15 @@ class Play extends Phaser.Scene{
     }
 
     create() {
+
+        //Everything here will be moved to loading screen
+        this.anims.create({
+            key: 'portalanims',
+            frames: this.anims.generateFrameNumbers('portal', { start: 0, end: 3}),
+            frameRate: 8,
+            repeat: -1
+        });
+        //----------------------------
 
         this.GAME_WIDTH = 700;
         this.GAME_HEIGHT = 700;

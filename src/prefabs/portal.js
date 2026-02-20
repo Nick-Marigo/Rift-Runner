@@ -12,6 +12,8 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
+        this.play('portalanims')
+
         this.body.setAllowGravity(false);
         this.setImmovable(true);
 

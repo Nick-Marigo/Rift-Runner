@@ -13,7 +13,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         
         this.speedMultiplier = 1.0;
         this.scrollSpeed = scrollSpeed;
-        this.playerMoveVelocity = 100;
+        this.playerMoveVelocity = 200;
 
         this.jumpSpeed = 450;
         this.fallSpeed = 450;
@@ -28,7 +28,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     applyRunVelocity(scene) {
         const { A, D } = scene.keys;
-        let vx = 0;
+
+        const driftVelocity = -(this.scrollSpeed * 0.5);
+
+        let vx = driftVelocity;
 
         if (A.isDown) vx -= this.playerMoveVelocity;
         if (D.isDown) vx += this.playerMoveVelocity;
@@ -104,7 +107,13 @@ class SlideState extends State {
         const { S } = scene.keys;
         player.applyRunVelocity(scene);
 
+        const isCeilingAbove = player.body.blocked.up || player.body.touching.up;
+
         if (!S.isDown) {
+            if(isCeilingAbove) {
+                return;
+            }
+
             player.y -= player.height /2;
             this.stateMachine.transition(player.isGrounded() ? 'run' : 'jump');
         }

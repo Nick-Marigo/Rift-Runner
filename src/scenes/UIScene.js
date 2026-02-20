@@ -6,6 +6,12 @@ class UIScene extends Phaser.Scene {
     create() {
         this.gravityArrow = this.add.sprite(width / 2 - 50, height / 2, 'gravityArrow').setVisible(false);
         this.directionArrow = this.add.sprite(width / 2 + 50, height / 2, 'directionArrow').setVisible(false);
+        this.UIBorder = this.add.image(0, 0, 'UIBorder').setOrigin(0, 0);
+
+        this.title = this.add.bitmapText(width / 2, 50, "er_font", "Rift Runner", 48).setOrigin(0.5);
+
+        this.gravityText = this.add.bitmapText(250, 850, "er_font", "Gravity", 32).setOrigin(0.5);
+        this.directionText = this.add.bitmapText(600, 850, "er_font", "Direction", 32).setOrigin(0.5);
 
         this.anims.create({
             key: 'gravityArrowBlink',

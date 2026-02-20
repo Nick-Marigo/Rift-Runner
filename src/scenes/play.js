@@ -25,10 +25,20 @@ class Play extends Phaser.Scene{
             startFrame: 0,
             endFrame: 1
         });
+        this.load.image('UIBorder', '/UIBorder.png');
+
+        this.load.image('background', 'Background.png');
+        this.load.image('backgroundMiddle', 'BackgroundMiddle.png');
+        this.load.image('backgroundFront', 'BackgroundFront.png');
+
+        this.load.bitmapFont('er_font', 'font/ER-Font.png', 'font/ER-Font.xml');
         
     }
 
     create() {
+
+        this.GAME_WIDTH = 700;
+        this.GAME_HEIGHT = 700;
 
         this.nextAngle = 0;
         this.nextGravityKey = 'down';
@@ -56,7 +66,11 @@ class Play extends Phaser.Scene{
         this.scene.launch('UIScene');
         this.ui = this.scene.get('UIScene');
 
-        this.ground = new Ground(this, 'groundPlatform', this.scrollSpeed, height, width);
+        this.background = this.add.tileSprite(0, 0, 900, 900, 'background').setOrigin(0);
+        this.backgroundMiddle = this.add.tileSprite(0, 0, 900, 900, 'backgroundMiddle').setOrigin(0);
+        this.backgroundFront = this.add.tileSprite(0, 0, 900, 900, 'backgroundFront').setOrigin(0);
+
+        this.ground = new Ground(this, 'groundPlatform', this.scrollSpeed, this.GAME_HEIGHT + 100, this.GAME_WIDTH);
 
         this.keys = this.input.keyboard.addKeys({
             W: Phaser.Input.Keyboard.KeyCodes.W,     // JUMP
@@ -65,7 +79,7 @@ class Play extends Phaser.Scene{
             D: Phaser.Input.Keyboard.KeyCodes.D,     // RIGHT
         });
 
-        this.player = new Player(this, width / 2, 650, 'player', 0, this.scrollSpeed);
+        this.player = new Player(this, this.GAME_WIDTH / 4, 550, 'player', 0, this.scrollSpeed);
         this.player.setDisplaySize(48, 64);
 
         this.physics.add.collider(this.player, this.ground.group);
@@ -76,12 +90,23 @@ class Play extends Phaser.Scene{
         }, this);
 
 
-        this.obstacles = new ObstacleManager(this, 800, this.scrollSpeed);
+        this.obstacles = new ObstacleManager(this, this.GAME_HEIGHT, this.scrollSpeed);
         this.physics.add.collider(this.player, this.obstacles.platformGroup);
 
         this.physics.add.overlap(this.player, this.obstacles.hazardGroup, () => {
             console.log("Game Over");
         });
+
+        this.physics.world.setBounds(100, 100, 800, 800);
+        this.player.body.onWorldBounds = true;
+
+        this.physics.world.setBoundsCollision(true, true, true, true);
+
+        this.physics.world.on('worldbounds', (body, up, down, left, right) => {
+            if(body.gameObject === this.player) {
+                console.log("Game Over!");
+            }
+        })
 
         this.startCycle();
 
@@ -118,10 +143,15 @@ class Play extends Phaser.Scene{
 
         const dt = delta / 1000;
 
+        this.backgroundMiddle.tilePositionX += (this.scrollSpeed * 0.1) * dt;
+        this.backgroundFront.tilePositionX += (this.scrollSpeed * 0.3) * dt;
+
         this.ground.update(dt);
         this.playerFSM.step();
 
         this.handleChunkCycle(dt);
+
+        //if(this.player.x < )
 
         if(this.currentPortal) {
             this.currentPortal.setScrollSpeed(this.scrollSpeed);
@@ -146,6 +176,7 @@ class Play extends Phaser.Scene{
             this.exitPortal.setScrollSpeed(this.scrollSpeed);
             this.exitPortal.update(dt);
         }
+
 
         //this.obstacles.update(dt);
 
@@ -186,7 +217,7 @@ class Play extends Phaser.Scene{
 
         const portalX = info.chunkEndX - this.CHUNK_WIDTH + this.PORTAL_OFFSET_IN_CHUNK;*/
         const portalX = this.obstacles.nextSpawnX + 200;
-        const portalY = 750;
+        const portalY = this.GAME_HEIGHT - 150;
 
             this.currentPortal = new Portal(this, portalX, portalY, 'portal', this.scrollSpeed, this.player, 'entry', { 
                 onEnter: () => this.enterPortalTransition()
@@ -252,7 +283,7 @@ class Play extends Phaser.Scene{
 
             const safeX = this.cameras.main.scrollX + (this.scale.width * 0.25);
 
-            const safeY = this.player.y;
+            const safeY = this.GAME_HEIGHT - 150;
 
             this.player.setPosition(safeX, safeY);
             this.player.body.setVelocity(0, 0);

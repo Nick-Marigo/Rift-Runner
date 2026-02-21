@@ -113,6 +113,7 @@ class Play extends Phaser.Scene{
         this.portalYPlanned = 0;
         this.score = 0;
         this.isGameStarted = false;
+        this.gameOver = false;
 
         this.CHUNK_WIDTH = 1250;
         this.PORTAL_OFFSET_IN_CHUNK = 1000;
@@ -133,6 +134,14 @@ class Play extends Phaser.Scene{
         this.scene.launch('UIScene');
         this.ui = this.scene.get('UIScene');
 
+        this.gameMusic = this.sound.add('gameMusic', { loop: true, volume: 0.5 });
+        this.gameMusic.play();
+
+        this.deathSound = this.sound.add('deathSound', { volume: 0.5 });
+        this.portalSound = this.sound.add('portalSound', { volume: 0.5 });
+        this.arrowSound = this.sound.add('arrowSound', { volume: 0.3 });
+
+
         this.background = this.add.tileSprite(0, 0, 900, 900, 'background').setOrigin(0);
         this.backgroundMiddle = this.add.tileSprite(0, 0, 900, 900, 'backgroundMiddle').setOrigin(0);
         this.backgroundFront = this.add.tileSprite(0, 0, 900, 900, 'backgroundFront').setOrigin(0);
@@ -146,8 +155,7 @@ class Play extends Phaser.Scene{
             D: Phaser.Input.Keyboard.KeyCodes.D,     // RIGHT
         });
 
-        this.player = new Player(this, this.GAME_WIDTH / 4, this.GAME_HEIGHT - 50, 'player', 0, this.scrollSpeed);
-
+        this.player = new Player(this, this.GAME_WIDTH / 4, this.GAME_HEIGHT - 50, 'player', 0, this.actualGameSpeed);
 
         this.physics.add.collider(this.player, this.ground.group);
 
@@ -161,6 +169,7 @@ class Play extends Phaser.Scene{
         this.physics.add.collider(this.player, this.obstacles.platformGroup);
 
         this.physics.add.overlap(this.player, this.obstacles.hazardGroup, () => {
+            this.deathSound.play();
             console.log("Game Over");
         });
 
@@ -170,39 +179,13 @@ class Play extends Phaser.Scene{
         this.physics.world.setBoundsCollision(true, true, true, true);
 
         this.physics.world.on('worldbounds', (body, up, down, left, right) => {
-            if(body.gameObject === this.player) {
+            if(body.gameObject === this.player && left) {
+                this.deathSound.play();
                 console.log("Game Over!");
             }
         })
 
         this.startCycle();
-
-        /*this.input.keyboard.on('keydown-R', () => {
-            currentAngle += 90;
-            this.cameras.main.setAngle(currentAngle);
-        }, this);        
-
-        this.input.keyboard.on('keydown-F', () => {
-            if (this.cameras.main.zoomX === 1) {
-                this.cameras.main.setZoom(-1, 1);
-            } else {
-                this.cameras.main.setZoom(1, 1);r
-            }
-        }, this);
-
-        this.testGroup = this.add.group();
-
-    this.input.keyboard.on('keydown-E', () => {
-        // Spawn at the right edge of the screen
-        let testObj = this.physics.add.sprite(width + 50, height - 100, 'directionArrow');
-        this.testGroup.add(testObj);
-        
-        // Set a constant velocity moving WORLD LEFT
-        testObj.body.setAllowGravity(false);
-        testObj.body.setVelocityX(-200); 
-        
-        console.log("Object spawned. Moving World Left.");
-    }, this);*/
 
     }
 
@@ -220,7 +203,7 @@ class Play extends Phaser.Scene{
 
         if(this.isGameStarted && !this.isTransitioning) {
             const multiplier = this.scrollSpeed / 100;
-            this.score += (10 * multiplier) * dt;
+            this.score += (5 * multiplier) * dt;
             this.ui.updateScore(this.score);
         }
 
@@ -233,6 +216,7 @@ class Play extends Phaser.Scene{
             const distanceToPlayer = this.currentPortal.x - this.player.x;
 
             if(distanceToPlayer < 300) {
+                this.sound.play('arrowSound');
                 this.ui.events.emit('phaserWarning', {
                 gravityKey: this.nextGravityKey,
                 flip: this.nextFlip
@@ -346,6 +330,8 @@ class Play extends Phaser.Scene{
     enterPortalTransition() {
         if (this.isTransitioning) return;
         this.isTransitioning = true;
+
+        this.sound.play('portalSound');
 
         this.portalPlanned = false;
         this.currentPortal = null;

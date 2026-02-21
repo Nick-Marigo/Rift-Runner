@@ -17,16 +17,20 @@ class Ground {
     }
 
     update(dt) {
-        this.ground1.x -= this.scrollSpeed * dt;
-        this.ground2.x -= this.scrollSpeed * dt;
+        const moveAmount = this.scrollSpeed * dt;
+        this.ground1.x -= moveAmount;
+        this.ground2.x -= moveAmount;
 
-        if(this.ground1.x + this.width < 0) {
+        if(this.ground1.x <= -this.width + 100) {
             this.ground1.x = this.ground2.x + this.width;
         }
 
-        if(this.ground2.x + this.width < 0) {
+        if(this.ground2.x <= -this.width + 100) {
             this.ground2.x = this.ground1.x + this.width;
         }
+
+        this.ground1.refreshBody();
+        this.ground2.refreshBody();
 
     }
 }

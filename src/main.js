@@ -4,6 +4,15 @@
 
 //Font: https://www.dafont.com/ethnocentric.font
 
+//Music: https://opengameart.org/content/oves-essential-game-audio-pack-collection-160-files-updated
+
+//Sound effects:
+//Portal: https://opengameart.org/content/portal-sound
+//UI: https://opengameart.org/content/4-sci-fi-menu-sounds
+//Arrow Warning: https://opengameart.org/content/short-alarm
+//Death sounds: https://opengameart.org/content/5-hit-sounds-dying
+
+
 
 "use strict"
 

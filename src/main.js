@@ -33,7 +33,7 @@ let config = {
             debug: true
         }
     },
-    scene: [ Menu, Play, UIScene]
+    scene: [ Load, Menu, Play, UIScene]
 }
 
 let game = new Phaser.Game(config)

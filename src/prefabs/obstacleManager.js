@@ -1,35 +1,73 @@
 const CHUNKS = [
-    {
-        name: 'singleSpike',
+    /*{
+        name: 'Spikes',
         width: 1250,
         items: [
-            {key: 'spikeOne', x: 320, yOffset: 0, type: 'hazard'},
-            {key: 'spikeOne', x: 620, yOffset: 0, type: 'hazard'},
-            {key: 'spikeOne', x: 920, yOffset: 0, type: 'hazard'},
-            {key: 'spikeOne', x: 1000, yOffset: 0, type: 'hazard'}
+            {key: 'spikeOne', x: 0, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 200, yOffset: 0, type: 'hazard'},
+            {key: 'spikeOne', x: 232, yOffset: 0, type: 'hazard'},
+            {key: 'spikeFour', x: 500, yOffset: 0, type: 'hazard'},
+            {key: 'spikeFour', x: 750, yOffset: 0, type: 'hazard'},
+            {key: 'spikeEight', x: 1000, yOffset: 0, type: 'hazard'}
         ]
     },
     {
         name: 'platformHop',
         width: 1250,
         items : [
-            {key: 'platform', x: 320, yOffset: -140, type: 'platform'},
-            {key: 'spikeFour', x: 560, yOffset: 0, type: 'hazard'},
-            {key: 'spikeFour', x: 860, yOffset: 0, type: 'hazard'},
-            {key: 'spikeOne', x: 1000, yOffset: 0, type: 'hazard'}
+            {key: 'spikeEight', x: 0, yOffset: 0, type: 'hazard'},
+            {key: 'spikeEight', x: 256, yOffset: 0, type: 'hazard'},
+            {key: 'spikeEight', x: 512, yOffset: 0, type: 'hazard'},
+            {key: 'spikeEight', x: 768, yOffset: 0, type: 'hazard'},
+            {key: 'spikeEight', x: 1024, yOffset: 0, type: 'hazard'},
+            {key: 'platform', x: 200, yOffset: -140, type: 'platform'},
+            {key: 'platformLong', x: 580, yOffset: -140, type: 'platform'},
+            {key: 'platform', x: 1000, yOffset: -140, type: 'platform'}
         ]
     },
     {
-        name: 'spikeFloor',
+        name: 'SlidesALot',
         width: 1250,
         items: [
-            {key: 'spikeEight', x: 0, yOffset: 0, type: 'hazard'},
-            {key: 'platform', x: 64, yOffset: -140, type: 'platform'},
-            {key: 'spikeEight', x: 256, yOffset: 0, type: 'hazard'},
-            {key: 'platform', x: 320, yOffset: -140, type: 'platform'},
-            {key: 'spikeFour', x: 512, yOffset: 0, type: 'hazard'},
-            {key: 'spikeOne', x: 920, yOffset: 0, type: 'hazard'},
-            {key: 'spikeOne', x: 1000, yOffset: 0, type: 'hazard'}
+            {key: 'spikeFour', x: 0, yOffset: -72, type: 'hazard'},
+            {key: 'platform', x: 0, yOffset: -40, type: 'platform'},
+            {key: 'spikeFour', x: 300, yOffset: 0, type: 'hazard'},
+            {key: 'spikeFour', x: 600, yOffset: -72, type: 'hazard'},
+            {key: 'platform', x: 600, yOffset: -40, type: 'platform'},
+            {key: 'spikeEight', x: 900, yOffset: 0, type: 'hazard'},
+            {key: 'platformLong', x: 1028, yOffset: -40, type: 'platform'},
+            {key: 'platform', x: 1156, yOffset: -120, type: 'platform'},
+            {key: 'spikeFour', x: 1156, yOffset: -152, type: 'hazard'},
+            {key: 'spikeEight', x: 1156, yOffset: 0, type: 'hazard'}
+        ]
+    },
+    {
+        name: 'needleThreader',
+        width: 1250,
+        items: [
+            {key: 'spikeFour', x: 0, yOffset: 0 , type: 'hazard'},
+            {key: 'platform',  x: 200, yOffset: -32, type: 'platform'},
+            {key: 'platformLong', x: 328, yOffset: -100, type: 'platform'},
+            {key: 'platformLong', x: 584, yOffset: -100, type: 'platform'},
+            {key: 'spikeEight', x: 328, yOffset: -132, type: 'hazard'},
+            {key: 'spikeEight', x: 584, yOffset: -132, type: 'hazard'},
+            {key: 'platformLong', x: 328, yOffset: -32, type: 'platform'},
+            {key: 'platformLong', x: 584, yOffset: -32, type: 'platform'},
+            {key: 'spikeEight', x: 1000, yOffset: 0, type: 'hazard'}
+
+        ]
+    },*/
+    {
+        name: 'zigzag',
+        width: 1250,
+        items: [
+            {key: 'spikeEight', x: 0, yOffset: 0 , type: 'hazard'},
+            {key: 'platform', x: 100, yOffset: -128 , type: 'platform'},
+            {key: 'spikeEight', x: 350, yOffset: 0 , type: 'hazard'},
+            {key: 'platformLong', x: 500, yOffset: -128 , type: 'platform'},
+            {key: 'spikeOne', x: 600, yOffset: -160 , type: 'hazard'},
+            {key: 'platform', x: 900, yOffset: -128 , type: 'platform'},
+            {key: 'spikeEight', x: 900, yOffset: 0 , type: 'hazard'}
         ]
     }
 ];
@@ -41,7 +79,7 @@ class ObstacleManager {
         this.scrollSpeed = scrollSpeed;
 
         this.platformGroup = scene.physics.add.staticGroup();
-        this.hazardGroup = scene.physics.add.staticGroup();
+        this.hazardGroup = scene.physics.add.group();
 
         this.nextSpawnX = scene.scale.width + 200;
         this.lastChunk = null;
@@ -92,8 +130,17 @@ class ObstacleManager {
                 p.refreshBody();
             } else if (item.type === 'hazard') {
                 const h = this.hazardGroup.create(x, y, item.key);
+                this.hazardGroup.add(h);
                 h.setOrigin(0, 1);
-                h.refreshBody();
+                h.body.setAllowGravity(false);
+                h.body.setImmovable(true);
+                
+                const newWidth = h.width * .9;
+                const newHeight = h.height * .8;
+
+                h.body.setSize(newWidth, newHeight);
+                h.body.setOffset((h.width - newWidth) / 2, h.height - newHeight);
+
             }
         }
     }
@@ -120,7 +167,7 @@ class ObstacleManager {
         this.hazardGroup.children.iterate((obj) => {
             if (!obj) return;
             obj.x -= this.scrollSpeed * dt;
-            obj.refreshBody();
+            //obj.refreshBody();
 
             const camLeft = this.scene.cameras.main.scrollX;
             if (obj.x + obj.width < camLeft - this.cleanupBuffer) obj.destroy();

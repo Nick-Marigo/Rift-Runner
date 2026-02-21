@@ -5,7 +5,7 @@ class Menu extends Phaser.Scene {
 
     preload() {
 
-        this.load.path = "./assets/";
+        /*this.load.path = "./assets/";
 
         //Loading obstacles and ground
         this.load.image('groundPlatform', 'Ground.png');
@@ -55,6 +55,7 @@ class Menu extends Phaser.Scene {
 
         //Loading UI assets (Two arrow spritesheets are above)
         this.load.image('UIBorder', '/UIBorder.png');
+        this.load.image('gameOverText', '/GameTextBox.png');
 
         //Loading background layers
         this.load.image('background', 'Background.png');
@@ -74,14 +75,14 @@ class Menu extends Phaser.Scene {
         this.load.audio('portalSound', '/Sound/porta.ogg');
         this.load.audio('uiSound', '/Sound/Flashpoint001d.flac');
         this.load.audio('arrowSound', '/Sound/alarm.ogg');
-        this.load.audio('deathSound', '/Sound/die1.ogg');
+        this.load.audio('deathSound', '/Sound/die1.ogg');*/
 
     }
 
     create() {
 
         //Creating all animations
-        this.anims.create({
+        /*this.anims.create({
             key: 'portalanims',
             frames: this.anims.generateFrameNumbers('portal', { start: 0, end: 3}),
             frameRate: 8,
@@ -118,9 +119,9 @@ class Menu extends Phaser.Scene {
             frames: this.anims.generateFrameNumbers('directionArrow', {start: 0, end: 1}),
             frameRate: 6,
             repeat: -1
-        });
+        });*/
 
-        this.menuMusic = this.sound.add('menuMusic', { loop: true, volume: 0.5 });
+        this.menuMusic = this.sound.add('menuMusic', { loop: true, volume: 0.4 });
         this.menuMusic.play();
 
         this.add.image(0, 0, 'menuBackground').setOrigin(0);
@@ -186,22 +187,22 @@ class Menu extends Phaser.Scene {
             repeat: -1
         });
 
-        //Font: https://www.dafont.com/ethnocentric.font
-
+//Font: https://www.dafont.com/ethnocentric.font
 //Music: https://opengameart.org/content/oves-essential-game-audio-pack-collection-160-files-updated
-
 //Sound effects:
 //Portal: https://opengameart.org/content/portal-sound
 //UI: https://opengameart.org/content/4-sci-fi-menu-sounds
 //Arrow Warning: https://opengameart.org/content/short-alarm
 //Death sounds: https://opengameart.org/content/5-hit-sounds-dying
 
-        this.musicCredit = this.add.bitmapText(width / 2, 125, "er_font", "Music: Ove Melaa - Heaven Sings & Super Ninja Assasin\nhttps://opengameart.org/content/oves-essential-game-audio-pack-collection-160-files-updated", 16).setOrigin(0.5).setVisible(false);
-        this.soundCredit1 = this.add.bitmapText(width / 2, 300, "er_font", "Portal Sound Effect by Ignas:\n https://opengameart.org/content/portal-sound", 16).setOrigin(0.5).setVisible(false).setDepth(51);
-        this.soundCredit2 = this.add.bitmapText(width / 2, 400, "er_font", "UI Sound Effects by Tim Mortimer:\n https://opengameart.org/content/4-sci-fi-menu-sounds", 16).setOrigin(0.5).setVisible(false).setDepth(51);
-        this.soundCredit3 = this.add.bitmapText(width / 2, 500, "er_font", "Arrow Warning Sound Effect by yd:\n https://opengameart.org/content/short-alarm", 16).setOrigin(0.5).setVisible(false).setDepth(51);
-        this.soundCredit4 = this.add.bitmapText(width / 2, 600, "er_font", "Death Sound Effects by TinyWorlds:\n https://opengameart.org/content/5-hit-sounds-dying", 16).setOrigin(0.5).setVisible(false).setDepth(51);
-        this.exitCreditText = this.add.bitmapText(width / 2, 775, "er_font", "Press C to Exit Credits", 24).setOrigin(0.5).setVisible(false).setDepth(51);
+        this.musicCredit = this.add.bitmapText(width / 2 + 25, 175, "er_font", "Music: Ove Melaa - Heaven Sings & \nSuper Ninja Assasin\nhttps://opengameart.org/content/oves\n-essential-game-audio-pack-collection-160\n-files-updated", 16).setOrigin(0.5).setVisible(false).setDepth(51).setLeftAlign(true);
+        this.soundCredit1 = this.add.bitmapText(width / 2 + 25, 265, "er_font", "Portal Sound Effect by Ignas:\n https://opengameart.org/content\n/portal-sound", 16).setOrigin(0.5).setVisible(false).setDepth(51).setLeftAlign(true);
+        this.soundCredit2 = this.add.bitmapText(width / 2 + 25, 350, "er_font", "UI Sound Effects by Tim Mortimer:\n https://opengameart.org/content/4-sci-fi\n-menu-sounds", 16).setOrigin(0.5).setVisible(false).setDepth(51).setLeftAlign(true);
+        this.soundCredit3 = this.add.bitmapText(width / 2 + 25, 450, "er_font", "Arrow Warning Sound Effect by yd:\n https://opengameart.org/content\n/short-alarm", 16).setOrigin(0.5).setVisible(false).setDepth(51).setLeftAlign(true);
+        this.soundCredit4 = this.add.bitmapText(width / 2 + 25, 550, "er_font", "Death Sound Effects by TinyWorlds:\n https://opengameart.org/content/5-hit\n-sounds-dying", 16).setOrigin(0.5).setVisible(false).setDepth(51).setLeftAlign(true);
+        this.fontCredit = this.add.bitmapText(width / 2 + 25, 650, "er_font", "Font: Ethnocentric by Ray Larabie:\n https://www.dafont.com/ethnocentric.font", 16).setOrigin(0.5).setVisible(false).setDepth(51).setLeftAlign(true);
+        this.artCredit = this.add.bitmapText(width / 2 + 25, 700, "er_font", "Art: Created by Nick Marigo", 16).setOrigin(0.5).setVisible(false).setDepth(51).setLeftAlign(true);
+        this.exitCreditText = this.add.bitmapText(width / 2, 750, "er_font", "Press C to Exit Credits", 24).setOrigin(0.5).setVisible(false).setDepth(51);
         this.tweens.add({
             targets: this.exitCreditText,
             alpha: 0,
@@ -255,6 +256,8 @@ class Menu extends Phaser.Scene {
                 this.soundCredit2.setVisible(true);
                 this.soundCredit3.setVisible(true);
                 this.soundCredit4.setVisible(true);
+                this.fontCredit.setVisible(true);
+                this.artCredit.setVisible(true);
                 this.exitCreditText.setVisible(true);
             } else {
                 this.creditsTextOn = false;
@@ -264,6 +267,8 @@ class Menu extends Phaser.Scene {
                 this.soundCredit2.setVisible(false);
                 this.soundCredit3.setVisible(false);
                 this.soundCredit4.setVisible(false);
+                this.fontCredit.setVisible(false);
+                this.artCredit.setVisible(false);
                 this.exitCreditText.setVisible(false);
             }
         });

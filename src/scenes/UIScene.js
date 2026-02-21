@@ -16,20 +16,6 @@ class UIScene extends Phaser.Scene {
         this.directionText = this.add.bitmapText(550, 850, "er_font", "Direction", 32).setOrigin(0.5);
         this.scoreText = this.add.bitmapText(700, 50, 'er_font', "Score: 0", 32).setOrigin(0.5);
 
-        /*this.anims.create({
-            key: 'gravityArrowBlink',
-            frames: this.anims.generateFrameNumbers('gravityArrow', {start: 0, end: 1}),
-            frameRate: 6,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'directionArrowBlink',
-            frames: this.anims.generateFrameNumbers('directionArrow', {start: 0, end: 1}),
-            frameRate: 6,
-            repeat: -1
-        });*/
-
         this.gravityArrow.play('gravityArrowBlink');
         this.directionArrow.play('directionArrowBlink');
 
@@ -61,6 +47,16 @@ class UIScene extends Phaser.Scene {
 
     updateScore(score) {
         this.scoreText.setText(`Score: ${Math.floor(score)}`);
+    }
+
+    showGameOver(score) {
+        
+        this.add.image(width/2, height/2, 'gameOverText').setOrigin(0.5).setDepth(100);
+        this.add.bitmapText(width/2, 300, 'er_font', 'Game Over!', 24).setOrigin(0.5).setDepth(100);
+        this.add.bitmapText(width/2, 380, 'er_font', `Final Score: ${Math.floor(score)}`, 24).setOrigin(0.5).setDepth(100);
+        this.add.bitmapText(width/2, 450, 'er_font', 'Press D to Restart', 24).setOrigin(0.5).setDepth(100);
+        this.add.bitmapText(width/2, 520, 'er_font', 'Press A to Return\nto Menu', 24).setOrigin(0.5).setDepth(100).setCenterAlign();
+
     }
     
 }

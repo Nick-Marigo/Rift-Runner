@@ -9,6 +9,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.body.onWorldBounds = true;
 
         this.w = 48;
+        this.newWidth = 30;
         this.h = 64;
         
         this.speedMultiplier = 1.0;
@@ -17,7 +18,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
         this.jumpSpeed = 450;
         this.fallSpeed = 450;
-        //this.isSliding = false;
         
         scene.playerFSM = new StateMachine('idle', {
             idle: new IdleState(),
@@ -52,8 +52,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 class IdleState extends State {
     enter(scene, player) {
         player.setVelocity(0, 0);
-        player.body.setSize(player.w, player.h);
-        player.body.setOffset(0, 0);
+        player.body.setSize(player.newWidth, player.h);
+        player.body.setOffset(player.newWidth /2 - 5, 0);
         player.anims.play('player-idle');
     }
 
@@ -70,8 +70,8 @@ class IdleState extends State {
 class RunState extends State {
 
     enter(scene, player) {
-        player.body.setSize(player.w, player.h);
-        player.body.setOffset(0, 0);
+        player.body.setSize(player.newWidth, player.h);
+        player.body.setOffset(player.newWidth /2 - 5, 0);
         player.anims.play('player-run');
     }
 
@@ -95,6 +95,11 @@ class RunState extends State {
 }
 
 class JumpState extends State {
+    enter(scene, player) {
+        player.body.setSize(player.newWidth, player.h);
+        player.body.setOffset(player.newWidth /2 - 5, 0);
+    }
+
     execute(scene, player) {
 
         const { S } = scene.keys;

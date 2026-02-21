@@ -4,91 +4,10 @@ class Play extends Phaser.Scene{
     }
 
     preload() {
-
-       /* this.load.path = "./assets/";
-        this.load.image('groundPlatform', 'GroundPlatformDebug.png');
-        this.load.spritesheet('portal', 'Portal.png', {
-            frameWidth: 48,
-            frameHeight: 128,
-            startFrame: 0,
-            endFrame: 3
-        });
-        this.load.image('spikeOne', '/obstacles/SpikeOne.png');
-        this.load.image('spikeFour', '/obstacles/SpikeFour.png');
-        this.load.image('spikeEight', '/obstacles/SpikeEight.png');
-        this.load.image('platform', '/obstacles/Platform.png');
-        this.load.image('platformLong', '/obstacles/PlatformLong.png')
-        this.load.spritesheet('gravityArrow', 'GravityArrow.png', {
-            frameWidth: 48,
-            frameHeight: 64,
-            startFrame: 0,
-            endFrame: 1
-        });
-        this.load.spritesheet('directionArrow', 'DirectionArrow.png', {
-            frameWidth: 48,
-            frameHeight: 64,
-            startFrame: 0,
-            endFrame: 1
-        });
-        this.load.spritesheet('playerIdle', '/Runner/RunnerIdle.png', {
-            frameWidth: 48,
-            frameHeight: 64,
-            startFrame: 0,
-            endFrame: 3
-        });
-        this.load.spritesheet('playerRun', '/Runner/RunnerRunning.png', {
-            frameWidth: 48,
-            frameHeight: 64,
-            startFrame: 0,
-            endFrame: 3
-        });
-        this.load.spritesheet('playerSlide', '/Runner/RunnerSlide.png', {
-            frameWidth: 64,
-            frameHeight: 24,
-            startFrame: 0,
-            endFrame: 2
-        });
-
-
-        this.load.image('UIBorder', '/UIBorder.png');
-
-        this.load.image('background', 'Background.png');
-        this.load.image('backgroundMiddle', 'BackgroundMiddle.png');
-        this.load.image('backgroundFront', 'BackgroundFront.png');
-
-        this.load.bitmapFont('er_font', 'font/ER-Font.png', 'font/ER-Font.xml');*/
         
     }
 
     create() {
-
-        //Everything here will be moved to loading screen
-        /*this.anims.create({
-            key: 'portalanims',
-            frames: this.anims.generateFrameNumbers('portal', { start: 0, end: 3}),
-            frameRate: 8,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'player-idle',
-            frames: this.anims.generateFrameNumbers('playerIdle', { start: 0, end: 3}),
-            frameRate: 6,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'player-run',
-            frames: this.anims.generateFrameNumbers('playerRun', { start: 0, end: 3}),
-            frameRate: 6,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'player-slide',
-            frames: this.anims.generateFrameNumbers('playerSlide', { start: 0, end: 2}),
-            frameRate: 6,
-            repeat: -1
-        });*/
-        //----------------------------
 
         this.GAME_WIDTH = 700;
         this.GAME_HEIGHT = 700;
@@ -113,7 +32,7 @@ class Play extends Phaser.Scene{
         this.portalYPlanned = 0;
         this.score = 0;
         this.isGameStarted = false;
-        this.gameOver = false;
+        this.isGameOver = false;
 
         this.CHUNK_WIDTH = 1250;
         this.PORTAL_OFFSET_IN_CHUNK = 1000;
@@ -134,7 +53,7 @@ class Play extends Phaser.Scene{
         this.scene.launch('UIScene');
         this.ui = this.scene.get('UIScene');
 
-        this.gameMusic = this.sound.add('gameMusic', { loop: true, volume: 0.5 });
+        this.gameMusic = this.sound.add('gameMusic', { loop: true, volume: 0.4 });
         this.gameMusic.play();
 
         this.deathSound = this.sound.add('deathSound', { volume: 0.5 });
@@ -160,7 +79,7 @@ class Play extends Phaser.Scene{
         this.physics.add.collider(this.player, this.ground.group);
 
         this.input.keyboard.on('keydown-G', () => {
-            this.physics.world.drawDebug = this.physics.world.drawDebug ? false : true;
+            this.physics.world.drawDebug = this.physics.world.drawDebug ? true : false;
             this.physics.world.debugGraphic.clear();
         }, this);
 
@@ -171,6 +90,7 @@ class Play extends Phaser.Scene{
         this.physics.add.overlap(this.player, this.obstacles.hazardGroup, () => {
             this.deathSound.play();
             console.log("Game Over");
+            this.gameOver();
         });
 
         this.physics.world.setBounds(100, 100, 800, 800);
@@ -182,6 +102,7 @@ class Play extends Phaser.Scene{
             if(body.gameObject === this.player && left) {
                 this.deathSound.play();
                 console.log("Game Over!");
+                this.gameOver();
             }
         })
 
@@ -190,6 +111,8 @@ class Play extends Phaser.Scene{
     }
 
     update(time, delta) {
+
+        if(this.isGameOver) return;
 
         const dt = delta / 1000;
 
@@ -421,39 +344,35 @@ class Play extends Phaser.Scene{
 
     }
 
-    /*startCycle() {
-
-        this.chunksPerCycle = this.getChunksPerCycle();
-        this.chunksThisCycle = 0;
-        this.portalPlanned = false;
-        this.portalXPlanned = 0;
-        this.portalYPlanned = 0;
-
-        if (this.arrowTimer) this.arrowTimer.remove(false);
-        if (this.portalTimer) this.portalTimer.remove(false);
-
-        this.pickNextPhase();
-
-        this.arrowTimer = this.time.delayedCall(8000, () => {
-            this.ui.events.emit('phaserWarning', {
-                gravityKey: this.nextGravityKey,
-                angle: this.nextAngle,
-                flip: this.nextFlip
-            });
-        });
-
-        this.portalTimer = this.time.delayedCall(10000, () => {
-            const spawnX = this.player.x + 500;
-            const spawnY = this.player.y;
-
-            this.currentPortal = new Portal(this, spawnX, spawnY, 'portal', this.scrollSpeed, this.player, 'entry', {
-                //player: this.player,
-                onEnter: () => this.enterPortalTransition()
-            });
-        });
-    }*/
-
     getChunksPerCycle() {
         return 1 + Math.floor((this.scrollSpeed - 100) / 50);
+    }
+
+    gameOver() {
+
+        if(this.isGameOver) return;
+        this.isGameOver = true;
+
+        this.sound.play('deathSound');
+
+        this.scrollSpeed = 0;
+        this.ground.scrollSpeed = 0;''
+        this.physics.pause();
+        this.player.anims.stop();
+        this.player.setTint(0Xff0000);
+
+        this.ui.showGameOver(this.score);
+
+        this.keys.D.once('down', () => {
+            this.gameMusic.stop();
+            this.scene.restart();
+        });
+
+        this.keys.A.once('down', () => {
+            this.gameMusic.stop();
+            this.scene.stop('UIScene');
+            this.scene.start('Menu');
+        });
+
     }
 }

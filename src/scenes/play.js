@@ -5,7 +5,7 @@ class Play extends Phaser.Scene{
 
     preload() {
 
-        this.load.path = "./assets/";
+       /* this.load.path = "./assets/";
         this.load.image('groundPlatform', 'GroundPlatformDebug.png');
         this.load.spritesheet('portal', 'Portal.png', {
             frameWidth: 48,
@@ -56,7 +56,7 @@ class Play extends Phaser.Scene{
         this.load.image('backgroundMiddle', 'BackgroundMiddle.png');
         this.load.image('backgroundFront', 'BackgroundFront.png');
 
-        this.load.bitmapFont('er_font', 'font/ER-Font.png', 'font/ER-Font.xml');
+        this.load.bitmapFont('er_font', 'font/ER-Font.png', 'font/ER-Font.xml');*/
         
     }
 

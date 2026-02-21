@@ -66,7 +66,7 @@ class Menu extends Phaser.Scene {
         this.load.image('textBox', 'TextBox.png');
 
         //Loading bitmap Font
-        this.load.bitmapFont('er_font', 'Font/ER-Font.png', 'Font/ER-Font.xml');
+        this.load.bitmapFont('er_font', 'Font/ERFont.png', 'Font/ERFont.xml');
 
         //Loading audio
         this.load.audio('menuMusic', '/Sound/Ove Melaa - Heaven Sings.mp3');

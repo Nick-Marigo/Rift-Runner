@@ -1,6 +1,6 @@
 class Play extends Phaser.Scene{
     constructor(){
-        super()
+        super({ key: 'Play' });
     }
 
     preload() {
@@ -30,6 +30,26 @@ class Play extends Phaser.Scene{
             startFrame: 0,
             endFrame: 1
         });
+        this.load.spritesheet('playerIdle', '/Runner/RunnerIdle.png', {
+            frameWidth: 48,
+            frameHeight: 64,
+            startFrame: 0,
+            endFrame: 3
+        });
+        this.load.spritesheet('playerRun', '/Runner/RunnerRunning.png', {
+            frameWidth: 48,
+            frameHeight: 64,
+            startFrame: 0,
+            endFrame: 3
+        });
+        this.load.spritesheet('playerSlide', '/Runner/RunnerSlide.png', {
+            frameWidth: 64,
+            frameHeight: 24,
+            startFrame: 0,
+            endFrame: 2
+        });
+
+
         this.load.image('UIBorder', '/UIBorder.png');
 
         this.load.image('background', 'Background.png');
@@ -43,12 +63,31 @@ class Play extends Phaser.Scene{
     create() {
 
         //Everything here will be moved to loading screen
-        this.anims.create({
+        /*this.anims.create({
             key: 'portalanims',
             frames: this.anims.generateFrameNumbers('portal', { start: 0, end: 3}),
             frameRate: 8,
             repeat: -1
         });
+
+        this.anims.create({
+            key: 'player-idle',
+            frames: this.anims.generateFrameNumbers('playerIdle', { start: 0, end: 3}),
+            frameRate: 6,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'player-run',
+            frames: this.anims.generateFrameNumbers('playerRun', { start: 0, end: 3}),
+            frameRate: 6,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'player-slide',
+            frames: this.anims.generateFrameNumbers('playerSlide', { start: 0, end: 2}),
+            frameRate: 6,
+            repeat: -1
+        });*/
         //----------------------------
 
         this.GAME_WIDTH = 700;
@@ -65,17 +104,31 @@ class Play extends Phaser.Scene{
         this.lastGravityKey = null;
         this.lastFlip = null;
 
-        this.scrollSpeed = 100;
+        this.actualGameSpeed = 100;
+        this.scrollSpeed = 0;
         this.chunksPerCycle = this.getChunksPerCycle();
         this.chunksThisCycle = 0;
         this.portalPlanned = false;
         this.portalXPlanned = 0;
         this.portalYPlanned = 0;
+        this.score = 0;
+        this.isGameStarted = false;
 
         this.CHUNK_WIDTH = 1250;
         this.PORTAL_OFFSET_IN_CHUNK = 1000;
         this.distanceThisCycle = 0;
         this.warningFired = false;
+
+        this.startText = this.add.bitmapText(width / 2, height / 2, 'er_font', 'Press D to Start!', 32).setOrigin(0.5).setCenterAlign().setDepth(100);
+
+        this.tweens.add({
+            targets: this.startText,
+            alpha: 0,
+            duration: 500,
+            ease: 'Linear',
+            yoyo: true,
+            repeat: -1
+        })
 
         this.scene.launch('UIScene');
         this.ui = this.scene.get('UIScene');
@@ -93,8 +146,8 @@ class Play extends Phaser.Scene{
             D: Phaser.Input.Keyboard.KeyCodes.D,     // RIGHT
         });
 
-        this.player = new Player(this, this.GAME_WIDTH / 4, 550, 'player', 0, this.scrollSpeed);
-        this.player.setDisplaySize(48, 64);
+        this.player = new Player(this, this.GAME_WIDTH / 4, this.GAME_HEIGHT - 50, 'player', 0, this.scrollSpeed);
+
 
         this.physics.add.collider(this.player, this.ground.group);
 
@@ -124,7 +177,7 @@ class Play extends Phaser.Scene{
 
         this.startCycle();
 
-             /*   this.input.keyboard.on('keydown-R', () => {
+        /*this.input.keyboard.on('keydown-R', () => {
             currentAngle += 90;
             this.cameras.main.setAngle(currentAngle);
         }, this);        
@@ -165,7 +218,11 @@ class Play extends Phaser.Scene{
 
         this.handleChunkCycle(dt);
 
-        //if(this.player.x < )
+        if(this.isGameStarted && !this.isTransitioning) {
+            const multiplier = this.scrollSpeed / 100;
+            this.score += (10 * multiplier) * dt;
+            this.ui.updateScore(this.score);
+        }
 
         if(this.currentPortal) {
             this.currentPortal.setScrollSpeed(this.scrollSpeed);
@@ -191,9 +248,17 @@ class Play extends Phaser.Scene{
             this.exitPortal.update(dt);
         }
 
+    }
 
-        //this.obstacles.update(dt);
+    startGame() {
+        this.isGameStarted = true;
+        if(this.scrollSpeed > 0) return;
 
+        this.scrollSpeed = this.actualGameSpeed;
+        this.ground.scrollSpeed = this.scrollSpeed;
+        this.obstacles.scrollSpeed = this.scrollSpeed;
+
+        this.startText.setVisible(false);
     }
 
     handleChunkCycle(dt) {

@@ -19,7 +19,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.fallSpeed = 450;
         //this.isSliding = false;
         
-        scene.playerFSM = new StateMachine('run', {
+        scene.playerFSM = new StateMachine('idle', {
+            idle: new IdleState(),
             run: new RunState(),
             jump: new JumpState(),
             slide: new SlideState(),
@@ -48,11 +49,30 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
 }
 
+class IdleState extends State {
+    enter(scene, player) {
+        player.setVelocity(0, 0);
+        player.body.setSize(player.w, player.h);
+        player.body.setOffset(0, 0);
+        player.anims.play('player-idle');
+    }
+
+    execute(scene, player) {
+        const { D } = scene.keys;
+
+        if(D.isDown) {
+            scene.startGame();
+            this.stateMachine.transition('run');
+        }
+    }
+}
+
 class RunState extends State {
 
     enter(scene, player) {
-        player.body.setSize(player.width, player.height);
+        player.body.setSize(player.w, player.h);
         player.body.setOffset(0, 0);
+        player.anims.play('player-run');
     }
 
     execute(scene, player) {
@@ -98,8 +118,9 @@ class JumpState extends State {
 class SlideState extends State {
     enter(scene, player) {
         // Shrink the height by half
-        player.body.setSize(player.width, player.height / 2);
-        player.body.setOffset(0, player.height / 2);
+        player.anims.play('player-slide');
+        player.body.setOffset(0, player.h / 2);
+        player.body.setSize(player.w, player.h / 2);
         
     }
 
@@ -114,7 +135,7 @@ class SlideState extends State {
                 return;
             }
 
-            player.y -= player.height /2;
+            player.y -= player.h /2;
             this.stateMachine.transition(player.isGrounded() ? 'run' : 'jump');
         }
     }

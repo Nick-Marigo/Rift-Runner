@@ -1,5 +1,5 @@
 const CHUNKS = [
-    /*{
+    {
         name: 'Spikes',
         width: 1250,
         items: [
@@ -56,7 +56,7 @@ const CHUNKS = [
             {key: 'spikeEight', x: 1000, yOffset: 0, type: 'hazard'}
 
         ]
-    },*/
+    },
     {
         name: 'zigzag',
         width: 1250,

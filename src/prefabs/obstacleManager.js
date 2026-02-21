@@ -167,7 +167,6 @@ class ObstacleManager {
         this.hazardGroup.children.iterate((obj) => {
             if (!obj) return;
             obj.x -= this.scrollSpeed * dt;
-            //obj.refreshBody();
 
             const camLeft = this.scene.cameras.main.scrollX;
             if (obj.x + obj.width < camLeft - this.cleanupBuffer) obj.destroy();

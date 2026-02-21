@@ -51,7 +51,6 @@ class Portal extends Phaser.Physics.Arcade.Sprite {
     update(dt) {
         this.x -= this.scrollSpeed * dt;
 
-        //const camLeft = this.scene.cameras.main.scrollX;
         if(this.x + this.width < -200) {
             this.destroy();
         }

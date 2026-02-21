@@ -30,7 +30,8 @@ Include in-game credits for all roles, assets, music, etc. (1) Done
 */
 
 //Creative Tilt:
-//Technically interesting: I originally learned how to manipulate gravity with a bunch of math which can be see at this repository: https://github.com/Nick-Marigo/Endless-Runner After meeting with Nathan he recommended to see if I could manipulate the camera to create the illusion of graivty manipulation, which I was able to do and is a much more efficient way to achieve the same effect. To see camera manipulation in action, look at play.js in functions pickNextPhase and applyNextPhase (lines 214-244). It uses constants in the bottom of this file to store camera angles (gravity) and then a value that flips the camera (direction) using setZoom(-1, 1).
+//Technically interesting: I originally learned how to manipulate gravity with a bunch of math which can be see at this repository: https://github.com/Nick-Marigo/Endless-Runner After meeting with Nathan he recommended to see if I could manipulate the camera to create the illusion of graivty manipulation, which I was able to do and is a much more efficient way to achieve the same effect. To see camera manipulation in action, in functions pickNextPhase and applyNextPhase (lines 214-244 in play.js). It uses constants in the bottom of this file to store camera angles (gravity) and then a value that flips the camera (direction) using setZoom(-1, 1).
+//Visual: To enchance game feel and provide tactile feedback during gravity shifts, I implemented a synchronized Camera Shake and Flash effect in function enterPortalTransition (lines 253-286 in play.js). This creates a mask over the teleportation of the player and anchors the camera rotation in physical sensation of impact.
 
 
 "use strict"

@@ -254,6 +254,9 @@ class Play extends Phaser.Scene{
         if (this.isTransitioning) return;
         this.isTransitioning = true;
 
+        this.cameras.main.shake(200, 0.007);
+        this.cameras.main.flash(150, 255, 255, 255);
+
         this.sound.play('portalSound');
 
         this.portalPlanned = false;
@@ -356,7 +359,7 @@ class Play extends Phaser.Scene{
         this.sound.play('deathSound');
 
         this.scrollSpeed = 0;
-        this.ground.scrollSpeed = 0;''
+        this.ground.scrollSpeed = 0;
         this.physics.pause();
         this.player.anims.stop();
         this.player.setTint(0Xff0000);
